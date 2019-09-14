@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+import yawap_tools
+
+yawap_tools.main()

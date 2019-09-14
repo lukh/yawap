@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/python
 import os
 import subprocess
+import argparse
 import wpasupplicantconf as wsc
 
 WIFI_NETWORK_LIST_FILE = "/var/lib/wifi_ap_tool/scanned_networks"
 
-def install(ap_name, ap_passwd):
+def install(ap_name, ap_passwd, interface="wlan0"):
     os.popen("sudo apt install dnsmasq hostapd")
 
     os.popen('sudo systemctl stop dnsmasq')
@@ -21,10 +21,12 @@ def install(ap_name, ap_passwd):
     os.popen('sudo echo"dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h" >> /etc/dnsmasq.conf')
     os.popen('sudo systemctl reload dnsmasq')
 
+    # "echo 'nickw444  ALL=(ALL:ALL) ALL' >> /etc/sudoers"
+
 
     with open('/etc/hostapd/hostapd.conf', "w") as hostapd:
         hostapd.write("""\
-interface=wlan0
+interface={}
 driver=nl80211
 ssid={}
 hw_mode=g
@@ -37,27 +39,27 @@ wpa=2
 wpa_passphrase={}
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
-rsn_pairwise=CCMP""".format(ap_name, ap_passwd))
+rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
     os.popen('sudo echo "DAEMON_CONF="/etc/hostapd/hostapd.conf" >> /etc/default/hostapd')
 
 
 def scan_networks(interface="wlan0"):
-    print "Scanning available networks"
+    print("Scanning available networks")
     command = """sudo iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
     result = os.popen(command)
     result = list(result)
     ssid_list = []
 
     if "Device or resource busy" not in result:
-        ssid_list = [item.lstrip('SSID:').strip('"\n') for item in result]
+        ssid_list = [item.lstrip('SSID:').strip('"') for item in result]
 
     return [i for i in set(ssid_list) if i != ""]
 
 
 
 def turn_on_ap():
-    print "Starting AP"
+    print ("Starting AP")
     os.popen("sudo systemctl stop dhcpcd")
 
     os.popen("sudo cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
@@ -74,7 +76,7 @@ def turn_on_ap():
 
 
 def turn_off_ap():
-    print "Stoping AP"
+    print ("Stoping AP")
     os.popen("sudo systemctl stop hostapd")
     os.popen("sudo systemctl stop dnsmasq")
 
@@ -93,7 +95,7 @@ def turn_off_ap():
 
 
 def is_connected_to_internet():
-    print "Checking Internet Connection"
+    print ("Checking Internet Connection")
     # ping gateway
     cmd = "ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
@@ -108,30 +110,41 @@ def add_network(ssid, passwd):
     conf.write("/etc/wpa_supplicant/wpa_supplicant.conf")
 
 
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) == 2:
-        if sys.argv[1] == "on":
-            turn_on_ap()
 
-        elif sys.argv[1] == "off":
-            turn_off_ap()
+def main():
+    parser = argparse.ArgumentParser(description="Check internet connectivity and manage access point. When no options are given, the script checks the internet connectivity. If it can't connect to internet, it scans the wifi networks and starts the AP")
+    parser.add_argument('--on', action='store_true', help='Start the access point')
+    parser.add_argument('--off', action='store_true', help='Stop the access point and try to connect to Wifi')
+    parser.add_argument('--scan', action='store_true', help='Return the scanned Wifi Networks')
+    parser.add_argument('--connect', nargs=2, help='Connect to the network given. Usage: --connect SSID Key')
 
-        elif sys.argv[1] == "scan":
-            with open(WIFI_NETWORK_LIST_FILE) as f:
-                print f.read()
+    args = parser.parse_args()
 
-    elif len(sys.argv) == 4:
-        if sys.argv[1] == "connect":
-            add_network(sys.argv[2], sys.argv[3])
-            turn_off_ap()
+    if args.on:
+        turn_on_ap()
+
+    elif args.off:
+        turn_off_ap()
+
+    elif args.scan:
+        # if ap mode started
+        with open(WIFI_NETWORK_LIST_FILE) as f:
+            print (f.read())
+
+        # else:
+        #   networks = scan_networks()
+        #   print ("\n".join(networks))
+
+    elif args.connect is not None:
+        add_network(args.connect[0], args.connect(1))
+        turn_off_ap()
 
     else:
         if not is_connected_to_internet():
             networks = scan_networks()
 
             with open(WIFI_NETWORK_LIST_FILE, 'w') as fp:
-                fp.write("\n".join(networks))
+                fp.write("".join(networks))
 
             turn_on_ap()
 
