@@ -17,9 +17,13 @@ def install(ap_name, ap_passwd, interface="wlan0"):
     os.popen('cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
     os.popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
 
-    os.popen('touch /etc/dnsmasq.conf')
-    os.popen('echo "interface=wlan0      # Use the require wireless interface - usually wlan0" >> /etc/dnsmasq.conf')
-    os.popen('echo"dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h" >> /etc/dnsmasq.conf')
+    with open('/etc/dnsmasq.conf', "w") as dnsmasq:
+        dnsmasq.write(
+            "interface={}"
+            "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h".format(interface)
+        )
+
+
     os.popen('systemctl reload dnsmasq')
 
     # "echo 'nickw444  ALL=(ALL:ALL) ALL' >> /etc/sudoers"
