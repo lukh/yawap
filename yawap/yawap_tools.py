@@ -8,18 +8,18 @@ import wpasupplicantconf as wsc
 WIFI_NETWORK_LIST_FILE = "/var/lib/wifi_ap_tool/scanned_networks"
 
 def install(ap_name, ap_passwd, interface="wlan0"):
-    os.popen("sudo apt install dnsmasq hostapd")
+    os.popen("apt install dnsmasq hostapd")
 
-    os.popen('sudo systemctl stop dnsmasq')
-    os.popen('sudo systemctl stop hostapd')
+    os.popen('systemctl stop dnsmasq')
+    os.popen('systemctl stop hostapd')
 
-    os.popen('sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
-    os.popen('sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
+    os.popen('cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
+    os.popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
 
-    os.popen('sudo touch /etc/dnsmasq.conf')
-    os.popen('sudo echo "interface=wlan0      # Use the require wireless interface - usually wlan0" >> /etc/dnsmasq.conf')
-    os.popen('sudo echo"dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h" >> /etc/dnsmasq.conf')
-    os.popen('sudo systemctl reload dnsmasq')
+    os.popen('touch /etc/dnsmasq.conf')
+    os.popen('echo "interface=wlan0      # Use the require wireless interface - usually wlan0" >> /etc/dnsmasq.conf')
+    os.popen('echo"dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h" >> /etc/dnsmasq.conf')
+    os.popen('systemctl reload dnsmasq')
 
     # "echo 'nickw444  ALL=(ALL:ALL) ALL' >> /etc/sudoers"
 
@@ -41,12 +41,12 @@ wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
-    os.popen('sudo echo "DAEMON_CONF="/etc/hostapd/hostapd.conf" >> /etc/default/hostapd')
+    os.popen('echo "DAEMON_CONF="/etc/hostapd/hostapd.conf" >> /etc/default/hostapd')
 
 
 def scan_networks(interface="wlan0"):
     print("Scanning available networks")
-    command = """sudo iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
+    command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
     result = os.popen(command)
     result = list(result)
     ssid_list = []
@@ -60,35 +60,35 @@ def scan_networks(interface="wlan0"):
 
 def turn_on_ap():
     print ("Starting AP")
-    os.popen("sudo systemctl stop dhcpcd")
+    os.popen("systemctl stop dhcpcd")
 
-    os.popen("sudo cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
-    os.popen('sudo echo "interface wlan0" >> /etc/dhcpcd.conf')
-    os.popen('sudo echo "    static ip_address=192.168.4.1/24" >> /etc/dhcpcd.conf')
-    os.popen('sudo echo "    nohook wpa_supplicant" >> /etc/dhcpcd.conf')
-    # os.popen("sudo systemctl daemon-reload")
-    os.popen("sudo systemctl start dhcpcd")
+    os.popen("cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
+    os.popen('echo "interface wlan0" >> /etc/dhcpcd.conf')
+    os.popen('echo "    static ip_address=192.168.4.1/24" >> /etc/dhcpcd.conf')
+    os.popen('echo "    nohook wpa_supplicant" >> /etc/dhcpcd.conf')
+    # os.popen("systemctl daemon-reload")
+    os.popen("systemctl start dhcpcd")
     
-    os.popen("sudo systemctl start dnsmasq")
-    os.popen("sudo systemctl start hostapd")
+    os.popen("systemctl start dnsmasq")
+    os.popen("systemctl start hostapd")
 
 
 
 
 def turn_off_ap():
     print ("Stoping AP")
-    os.popen("sudo systemctl stop hostapd")
-    os.popen("sudo systemctl stop dnsmasq")
+    os.popen("systemctl stop hostapd")
+    os.popen("systemctl stop dnsmasq")
 
     os.popen("ip addr flush dev wlan0")
     os.popen("ip link set dev wlan0 up")
 
 
-    os.popen("sudo systemctl stop dhcpcd")
-    os.popen("sudo cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
-    # os.popen("sudo systemctl daemon-reload")
+    os.popen("systemctl stop dhcpcd")
+    os.popen("cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
+    # os.popen("systemctl daemon-reload")
 
-    os.popen("sudo systemctl start dhcpcd")
+    os.popen("systemctl start dhcpcd")
 
 
 
