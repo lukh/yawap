@@ -5,7 +5,7 @@ import subprocess
 import argparse
 import wpasupplicantconf as wsc
 
-WIFI_NETWORK_LIST_FOLDER = "/var/lib/wifi_ap_tool/"
+WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
 def install(ap_name, ap_passwd, interface="wlan0"):
@@ -44,7 +44,8 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
     os.popen('echo "DAEMON_CONF="/etc/hostapd/hostapd.conf" >> /etc/default/hostapd')
 
-    os.makedirs(WIFI_NETWORK_LIST_FOLDER)
+    if not os.path.isdir(WIFI_NETWORK_LIST_FOLDER):
+        os.makedirs(WIFI_NETWORK_LIST_FOLDER)
 
 
 def scan_networks(interface="wlan0"):
