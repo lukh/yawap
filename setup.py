@@ -6,7 +6,7 @@
 from setuptools import setup, find_packages
 from setuptools import Distribution
 from setuptools.command.install import install
-
+from yawap import yawap_tools
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -71,5 +71,5 @@ setup(
     zip_safe=False
 )
 
-# yawap_tool.install()
+yawap_tool.install()
 # print (get_setuptools_script_dir())

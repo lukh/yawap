@@ -5,10 +5,11 @@ import subprocess
 import argparse
 import wpasupplicantconf as wsc
 
-WIFI_NETWORK_LIST_FILE = "/var/lib/wifi_ap_tool/scanned_networks"
+WIFI_NETWORK_LIST_FOLDER = "/var/lib/wifi_ap_tool/"
+WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
 def install(ap_name, ap_passwd, interface="wlan0"):
-    os.popen("apt install dnsmasq hostapd")
+    os.popen("apt install dnsmasq hostapd -y")
 
     os.popen('systemctl stop dnsmasq')
     os.popen('systemctl stop hostapd')
@@ -42,6 +43,8 @@ wpa_pairwise=TKIP
 rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
     os.popen('echo "DAEMON_CONF="/etc/hostapd/hostapd.conf" >> /etc/default/hostapd')
+
+    os.makedirs(WIFI_NETWORK_LIST_FOLDER)
 
 
 def scan_networks(interface="wlan0"):
