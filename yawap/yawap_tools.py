@@ -124,6 +124,7 @@ def add_network(ssid, passwd):
 
 def main():
     parser = argparse.ArgumentParser(description="Check internet connectivity and manage access point. When no options are given, the script checks the internet connectivity. If it can't connect to internet, it scans the wifi networks and starts the AP")
+    parser.add_argument('--install', nargs=3, action='store_true', help='Install hostapd, dnsmasq. Usage: --install INTERFACE SSID PASSWD')
     parser.add_argument('--on', action='store_true', help='Start the access point')
     parser.add_argument('--off', action='store_true', help='Stop the access point and try to connect to Wifi')
     parser.add_argument('--scan', action='store_true', help='Return the scanned Wifi Networks')
@@ -131,7 +132,10 @@ def main():
 
     args = parser.parse_args()
 
-    if args.on:
+    if args.install is not None:
+        install(args.install[1], args.install[2], interface=args.install[0])
+
+    elif args.on:
         turn_on_ap()
 
     elif args.off:

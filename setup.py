@@ -71,5 +71,5 @@ setup(
     zip_safe=False
 )
 
-yawap_tools.install()
+# yawap_tools.install()
 # print (get_setuptools_script_dir())
