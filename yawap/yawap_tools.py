@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import wpasupplicantconf as wsc
+
 import os
 import time
 import subprocess
 import argparse
-import wpasupplicantconf as wsc
+from signal import signal, SIGPIPE, SIG_DFL
+signal(SIGPIPE, SIG_DFL)
+
 
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
@@ -15,22 +19,24 @@ def popen(cmd):
 
 
 def install(ap_name, ap_passwd, interface="wlan0"):
-    popen("apt-get install dnsmasq hostapd -y")
-    time.sleep(2)
+    # popen("apt-get install dnsmasq hostapd -y")
+    # time.sleep(2)
 
     popen('systemctl unmask hostapd')
 
-    popen('systemctl enable dnsmasq.service')
-    popen('systemctl enable hostapd.service')
+    popen('systemctl enable dnsmasq')
+    popen('systemctl enable hostapd')
     time.sleep(2)
 
     popen('systemctl stop dnsmasq')
     popen('systemctl stop hostapd')
     time.sleep(2)
 
+    if not os.path.isfile("/etc/dhcpcd.conf.source"):
+        popen('cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
 
-    popen('cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
-    popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
+    if not os.path.isfile("/etc/dnsmasq.conf.orig"):
+        popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
 
     with open('/etc/dnsmasq.conf', "w") as dnsmasq:
         dnsmasq.write(
@@ -38,7 +44,7 @@ def install(ap_name, ap_passwd, interface="wlan0"):
             "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h\n".format(interface)
         )
 
-    popen('systemctl reload dnsmasq')
+    # popen('systemctl reload dnsmasq')
 
     # "echo 'nickw444  ALL=(ALL:ALL) ALL' >> /etc/sudoers"
 
@@ -127,8 +133,8 @@ def is_connected_to_internet():
     cmd = "ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
     output, err = process.communicate()
-    
-    return output == "ok"
+
+    return output.find("ok") != -1
 
 
 def add_network(ssid, passwd):
