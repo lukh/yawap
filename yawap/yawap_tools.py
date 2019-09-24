@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
 import subprocess
 import argparse
 import wpasupplicantconf as wsc
@@ -15,6 +16,7 @@ def popen(cmd):
 
 def install(ap_name, ap_passwd, interface="wlan0"):
     popen("apt-get install dnsmasq hostapd -y")
+    time.sleep(2)
 
     popen('systemctl stop dnsmasq')
     popen('systemctl stop hostapd')
