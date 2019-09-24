@@ -14,7 +14,7 @@ def popen(cmd):
 
 
 def install(ap_name, ap_passwd, interface="wlan0"):
-    popen("apt install dnsmasq hostapd -y")
+    popen("apt-get install dnsmasq hostapd -y")
 
     popen('systemctl stop dnsmasq')
     popen('systemctl stop hostapd')
@@ -24,8 +24,8 @@ def install(ap_name, ap_passwd, interface="wlan0"):
 
     with open('/etc/dnsmasq.conf', "w") as dnsmasq:
         dnsmasq.write(
-            "interface={}"
-            "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h".format(interface)
+            "interface={}\n"
+            "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h\n".format(interface)
         )
 
     popen('systemctl reload dnsmasq')
@@ -49,7 +49,13 @@ wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
-    popen('echo "DAEMON_CONF="/etc/hostapd/hostapd.conf" >> /etc/default/hostapd')
+
+    with open('/etc/default/hostapd', 'r') as hostapd_default:
+        had = hostapd_default.read()
+
+    had = had.replace('#DAEMON_CONF=""', 'DAEMON_CONF="/etc/hostapd/hostapd.conf"')
+    with open('/etc/default/hostapd', 'w') as hostapd_default:
+        hostapd_default.write(had)
 
     if not os.path.isdir(WIFI_NETWORK_LIST_FOLDER):
         os.makedirs(WIFI_NETWORK_LIST_FOLDER)
@@ -124,7 +130,7 @@ def add_network(ssid, passwd):
 
 def main():
     parser = argparse.ArgumentParser(description="Check internet connectivity and manage access point. When no options are given, the script checks the internet connectivity. If it can't connect to internet, it scans the wifi networks and starts the AP")
-    parser.add_argument('--install', nargs=3, action='store_true', help='Install hostapd, dnsmasq. Usage: --install INTERFACE SSID PASSWD')
+    parser.add_argument('--install', nargs=3, help='Install hostapd, dnsmasq. Usage: --install INTERFACE SSID PASSWD')
     parser.add_argument('--on', action='store_true', help='Start the access point')
     parser.add_argument('--off', action='store_true', help='Stop the access point and try to connect to Wifi')
     parser.add_argument('--scan', action='store_true', help='Return the scanned Wifi Networks')
