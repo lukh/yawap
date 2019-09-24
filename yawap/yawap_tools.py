@@ -18,10 +18,16 @@ def install(ap_name, ap_passwd, interface="wlan0"):
     popen("apt-get install dnsmasq hostapd -y")
     time.sleep(2)
 
+    popen('systemctl unmask hostapd')
+
+    popen('systemctl enable dnsmasq.service')
+    popen('systemctl enable hostapd.service')
+    time.sleep(2)
+
     popen('systemctl stop dnsmasq')
     popen('systemctl stop hostapd')
+    time.sleep(2)
 
-    popen('service hostapd unmask')
 
     popen('cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
     popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
