@@ -33,7 +33,16 @@ def install(ap_name, ap_passwd, interface="wlan0"):
     time.sleep(2)
 
     if not os.path.isfile("/etc/dhcpcd.conf.source"):
-        popen('cp /etc/dhcpcd.conf /etc/dhcpcd.conf.source')
+        with open('/etc/dhcpcd.conf', 'r') as fp_dhcpcd:
+            dhcpcd = fp_dhcpcd.read()
+
+        dhcpcd += "\n" \
+                  "noarp\n" \
+                  "timeout 2\n" \
+                  "retry 5\n" \
+
+        with open('/etc/dhcpcd.conf.source', 'w') as fp_dhcpcd_source:
+            fp_dhcpcd_source.write(dhcpcd)
 
     if not os.path.isfile("/etc/dnsmasq.conf.orig"):
         popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
@@ -173,7 +182,7 @@ def main():
         #   print ("\n".join(networks))
 
     elif args.connect is not None:
-        add_network(args.connect[0], args.connect[0])
+        add_network(args.connect[0], args.connect[1])
         turn_off_ap()
 
     else:
