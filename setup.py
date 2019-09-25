@@ -6,6 +6,7 @@
 from setuptools import setup, find_packages
 from setuptools import Distribution
 from setuptools.command.install import install
+from yawap import __version__
 from yawap import yawap_tools
 
 with open('README.rst') as readme_file:
@@ -67,7 +68,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/lukh/yawap',
-    version='0.0.1',
+    version=__version__,
     zip_safe=False
 )
 
