@@ -72,7 +72,7 @@ class WpaSupplicantConf:
         self._networks.pop(ssid, None)
 
     def write(self, filename):
-        with open(filename ,'w') as f:
+        with open(filename, 'w') as f:
             for name, value in self._fields.items():
                 f.write("{}={}\n".format(name, value))
 

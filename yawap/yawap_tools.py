@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import wpasupplicantconf as wsc
+import yawap.wpasupplicantconf as wsc
 
 import os
 import time
@@ -12,6 +12,7 @@ signal(SIGPIPE, SIG_DFL)
 
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
+
 
 def popen(cmd):
     print(cmd)
@@ -48,10 +49,9 @@ def install(ap_name, ap_passwd, interface="wlan0"):
         popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
 
     with open('/etc/dnsmasq.conf', "w") as dnsmasq:
-        dnsmasq.write(
-            "interface={}\n"
-            "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h\n".format(interface)
-        )
+        dnsmasq.write("interface={}\n".format(interface))
+        dnsmasq.write("dhcp-range="
+                      "192.168.4.2,192.168.4.20,255.255.255.0,24h\n")
 
     # popen('systemctl reload dnsmasq')
 
@@ -74,11 +74,11 @@ wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
-
     with open('/etc/default/hostapd', 'r') as hostapd_default:
         had = hostapd_default.read()
 
-    had = had.replace('#DAEMON_CONF=""', 'DAEMON_CONF="/etc/hostapd/hostapd.conf"')
+    had = had.replace('#DAEMON_CONF=""',
+                      'DAEMON_CONF="/etc/hostapd/hostapd.conf"')
     with open('/etc/default/hostapd', 'w') as hostapd_default:
         hostapd_default.write(had)
 
@@ -99,9 +99,8 @@ def scan_networks(interface="wlan0"):
     return [i for i in set(ssid_list) if i != ""]
 
 
-
 def turn_on_ap():
-    print ("Starting AP")
+    print("Starting AP")
     popen("systemctl stop dhcpcd")
 
     popen("cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
@@ -110,11 +109,9 @@ def turn_on_ap():
     popen('echo "    nohook wpa_supplicant" >> /etc/dhcpcd.conf')
     # popen("systemctl daemon-reload")
     popen("systemctl start dhcpcd")
-    
+
     popen("systemctl start dnsmasq")
     popen("systemctl start hostapd")
-
-
 
 
 def turn_off_ap():
@@ -125,7 +122,6 @@ def turn_off_ap():
     popen("ip addr flush dev wlan0")
     popen("ip link set dev wlan0 up")
 
-
     popen("systemctl stop dhcpcd")
     popen("cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
     # popen("systemctl daemon-reload")
@@ -133,14 +129,13 @@ def turn_off_ap():
     popen("systemctl start dhcpcd")
 
 
-
-
-
 def is_connected_to_internet():
-    print ("Checking Internet Connection")
+    print("Checking Internet Connection")
     # ping gateway
-    cmd = "ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
+    cmd = "ping -q -w 1 -c 1 `ip r |"
+    " grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE, stderr=None, shell=True)
     output, err = process.communicate()
 
     return output.find("ok") != -1
@@ -152,14 +147,29 @@ def add_network(ssid, passwd):
     conf.write("/etc/wpa_supplicant/wpa_supplicant.conf")
 
 
-
 def main():
-    parser = argparse.ArgumentParser(description="Check internet connectivity and manage access point. When no options are given, the script checks the internet connectivity. If it can't connect to internet, it scans the wifi networks and starts the AP")
-    parser.add_argument('--install', nargs=3, help='Install hostapd, dnsmasq. Usage: --install INTERFACE SSID PASSWD')
-    parser.add_argument('--on', action='store_true', help='Start the access point')
-    parser.add_argument('--off', action='store_true', help='Stop the access point and try to connect to Wifi')
-    parser.add_argument('--scan', action='store_true', help='Return the scanned Wifi Networks')
-    parser.add_argument('--connect', nargs=2, help='Connect to the network given. Usage: --connect SSID Key')
+    parser = argparse.ArgumentParser(
+        description="Check internet connectivity and manage access point. "
+                    "When no options are given, the script checks "
+                    "the internet connectivity. "
+                    "If it can't connect to internet, "
+                    "it scans the wifi networks and starts the AP")
+    parser.add_argument('--install',
+                        nargs=3,
+                        help='Install hostapd, dnsmasq. '
+                             'Usage: --install INTERFACE SSID PASSWD')
+    parser.add_argument('--on',
+                        action='store_true', help='Start the access point')
+    parser.add_argument('--off',
+                        action='store_true', help='Stop the access point '
+                                                  'and try to connect to Wifi')
+    parser.add_argument('--scan',
+                        action='store_true',
+                        help='Return the scanned Wifi Networks')
+    parser.add_argument('--connect',
+                        nargs=2,
+                        help='Connect to the network given.'
+                             'Usage: --connect SSID Key')
 
     args = parser.parse_args()
 
@@ -175,7 +185,7 @@ def main():
     elif args.scan:
         # if ap mode started
         with open(WIFI_NETWORK_LIST_FILE) as f:
-            print (f.read())
+            print(f.read())
 
         # else:
         #   networks = scan_networks()
@@ -193,4 +203,3 @@ def main():
                 fp.write("".join(networks))
 
             turn_on_ap()
-

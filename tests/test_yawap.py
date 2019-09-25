@@ -6,7 +6,7 @@
 
 import unittest
 
-from yawap import yawap
+from yawap import yawap_tools
 
 
 class TestYawap(unittest.TestCase):
