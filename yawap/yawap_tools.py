@@ -103,10 +103,14 @@ def turn_on_ap():
     print("Starting AP")
     popen("systemctl stop dhcpcd")
 
-    popen("cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
-    popen('echo "interface wlan0" >> /etc/dhcpcd.conf')
-    popen('echo "    static ip_address=192.168.4.1/24" >> /etc/dhcpcd.conf')
-    popen('echo "    nohook wpa_supplicant" >> /etc/dhcpcd.conf')
+    with open("/etc/dhcpcd.conf.source") as dhcpcd_fd:
+        dhcpcd_src = dhcpcd_fd.read()
+
+    with open("/etc/dhcpcd.conf", 'w') as dhcpcd_fd:
+        dhcpcd_fd.write(dhcpcd_src)
+        lines = "interface wlan0\n    static ip_address=192.168.4.1/24\n    nohook wpa_supplicant\n"
+        dhcpcd_fd.write(lines)
+
     # popen("systemctl daemon-reload")
     popen("systemctl start dhcpcd")
 
@@ -132,13 +136,11 @@ def turn_off_ap():
 def is_connected_to_internet():
     print("Checking Internet Connection")
     # ping gateway
-    cmd = "ping -q -w 1 -c 1 `ip r |"
-    " grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
-    process = subprocess.Popen(cmd,
-                               stdout=subprocess.PIPE, stderr=None, shell=True)
+    cmd = "ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
     output, err = process.communicate()
 
-    return output.find("ok") != -1
+    return output.find(b"ok") != -1
 
 
 def add_network(ssid, passwd):
@@ -150,10 +152,10 @@ def add_network(ssid, passwd):
 def main():
     parser = argparse.ArgumentParser(
         description="Check internet connectivity and manage access point. "
-                    "When no options are given, the script checks "
-                    "the internet connectivity. "
-                    "If it can't connect to internet, "
-                    "it scans the wifi networks and starts the AP")
+                "If started without arguments, and a internet connection is not available, "
+                "then it scans wifi networks and starts in AP mode"
+                "It is possible to manually turn on or off the AP. "
+                "And it is possible to add Wifi network or get the list of available network found.")
     parser.add_argument('--install',
                         nargs=3,
                         help='Install hostapd, dnsmasq. '
@@ -163,10 +165,10 @@ def main():
     parser.add_argument('--off',
                         action='store_true', help='Stop the access point '
                                                   'and try to connect to Wifi')
-    parser.add_argument('--scan',
+    parser.add_argument('--list',
                         action='store_true',
                         help='Return the scanned Wifi Networks')
-    parser.add_argument('--connect',
+    parser.add_argument('--add',
                         nargs=2,
                         help='Connect to the network given.'
                              'Usage: --connect SSID Key')
@@ -182,16 +184,12 @@ def main():
     elif args.off:
         turn_off_ap()
 
-    elif args.scan:
+    elif args.list:
         # if ap mode started
         with open(WIFI_NETWORK_LIST_FILE) as f:
             print(f.read())
 
-        # else:
-        #   networks = scan_networks()
-        #   print ("\n".join(networks))
-
-    elif args.connect is not None:
+    elif args.add is not None:
         add_network(args.connect[0], args.connect[1])
         turn_off_ap()
 
@@ -200,6 +198,6 @@ def main():
             networks = scan_networks()
 
             with open(WIFI_NETWORK_LIST_FILE, 'w') as fp:
-                fp.write("".join(networks))
+                fp.write(";".join(networks))
 
             turn_on_ap()
