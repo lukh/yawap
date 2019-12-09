@@ -135,8 +135,8 @@ def turn_off_ap():
 
 def is_connected_to_internet():
     print("Checking Internet Connection")
-    # ping gateway
-    cmd = "ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error"
+    # ping google gateway
+    cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
     output, err = process.communicate()
 
