@@ -171,7 +171,7 @@ def main():
     parser.add_argument('--add',
                         nargs=2,
                         help='Connect to the network given.'
-                             'Usage: --connect SSID Key')
+                             'Usage: --add SSID Key')
 
     args = parser.parse_args()
 
@@ -190,7 +190,7 @@ def main():
             print(f.read())
 
     elif args.add is not None:
-        add_network(args.connect[0], args.connect[1])
+        add_network(args.add[0], args.add[1])
         turn_off_ap()
 
     else:
