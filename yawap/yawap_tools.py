@@ -88,7 +88,7 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
 def scan_networks(interface="wlan0"):
     print("Scanning available networks")
-    command = """sudo iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
+    command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
     result = popen(command)
     result = list(result)
     ssid_list = []
