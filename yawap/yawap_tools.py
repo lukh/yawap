@@ -88,13 +88,13 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 
 def scan_networks(interface="wlan0"):
     print("Scanning available networks")
-    command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
+    command = """sudo iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
     result = popen(command)
     result = list(result)
     ssid_list = []
 
     if "Device or resource busy" not in result:
-        ssid_list = [item.lstrip('SSID:').strip('"') for item in result]
+        ssid_list = [item.lstrip('SSID:').strip('\n').strip('"') for item in result]
 
     return [i for i in set(ssid_list) if i != ""]
 
