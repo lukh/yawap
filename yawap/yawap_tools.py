@@ -195,9 +195,14 @@ def main():
 
     else:
         if not is_connected_to_internet():
+            print("Not connected to internet, started the AP")
+
             networks = scan_networks()
 
             with open(WIFI_NETWORK_LIST_FILE, 'w') as fp:
                 fp.write(";".join(networks))
 
             turn_on_ap()
+
+        else:
+            print("Connected :) ! Leaving")
