@@ -20,9 +20,6 @@ def popen(cmd):
 
 
 def install(ap_name, ap_passwd, interface="wlan0"):
-    # popen("apt-get install dnsmasq hostapd -y")
-    # time.sleep(2)
-
     popen('systemctl unmask hostapd')
 
     popen('systemctl enable dnsmasq')
@@ -33,6 +30,7 @@ def install(ap_name, ap_passwd, interface="wlan0"):
     popen('systemctl stop hostapd')
     time.sleep(2)
 
+    # dhcpcd
     if not os.path.isfile("/etc/dhcpcd.conf.source"):
         with open('/etc/dhcpcd.conf', 'r') as fp_dhcpcd:
             dhcpcd = fp_dhcpcd.read()
@@ -45,6 +43,7 @@ def install(ap_name, ap_passwd, interface="wlan0"):
         with open('/etc/dhcpcd.conf.source', 'w') as fp_dhcpcd_source:
             fp_dhcpcd_source.write(dhcpcd)
 
+    # dnsmasq
     if not os.path.isfile("/etc/dnsmasq.conf.orig"):
         popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
 
@@ -57,6 +56,8 @@ def install(ap_name, ap_passwd, interface="wlan0"):
 
     # "echo 'nickw444  ALL=(ALL:ALL) ALL' >> /etc/sudoers"
 
+
+    # hostapd
     with open('/etc/hostapd/hostapd.conf', "w") as hostapd:
         hostapd.write("""\
 interface={}
@@ -82,6 +83,9 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
     with open('/etc/default/hostapd', 'w') as hostapd_default:
         hostapd_default.write(had)
 
+
+
+    # ssid list dir
     if not os.path.isdir(WIFI_NETWORK_LIST_FOLDER):
         os.makedirs(WIFI_NETWORK_LIST_FOLDER)
 
