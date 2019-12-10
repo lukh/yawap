@@ -90,6 +90,23 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
         os.makedirs(WIFI_NETWORK_LIST_FOLDER)
 
 
+    # service
+    service_file_data = """\
+[Unit]
+Description=Yet Another Wifi Access Point Daemon
+After=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/yawap
+
+"""
+
+    with open('/etc/systemd/system/yawap.service', 'w') as service_file:
+        service_file.write(service_file_data)
+
+
 def scan_networks(interface="wlan0"):
     print("Scanning available networks")
     command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
@@ -142,7 +159,7 @@ def is_connected_to_internet():
     # ping google gateway
     cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
-    output, err = process.communicate()
+    output, _ = process.communicate()
 
     return output.find(b"ok") != -1
 
