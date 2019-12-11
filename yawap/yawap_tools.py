@@ -15,19 +15,19 @@ WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
 
 def popen(cmd):
-    print(cmd)
-    return os.popen(cmd)
+    ret = subprocess.run(cmd, capture_output=True)
+    return (ret.returncode, ret.stdout)
 
 
 def install(ap_name, ap_passwd, interface="wlan0"):
-    popen('systemctl unmask hostapd')
+    popen(["systemctl", "unmask", "hostapd"])
 
-    popen('systemctl enable dnsmasq')
-    popen('systemctl enable hostapd')
+    popen(["systemctl", "enable", "dnsmasq"])
+    popen(["systemctl", "enable", "hostapd"])
     time.sleep(2)
 
-    popen('systemctl stop dnsmasq')
-    popen('systemctl stop hostapd')
+    popen(["systemctl", "stop", "dnsmasq"])
+    popen(["systemctl", "stop", "hostapd"])
     time.sleep(2)
 
     # dhcpcd
@@ -45,14 +45,14 @@ def install(ap_name, ap_passwd, interface="wlan0"):
 
     # dnsmasq
     if not os.path.isfile("/etc/dnsmasq.conf.orig"):
-        popen('mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig')
+        popen(["mv", "/etc/dnsmasq.conf", "/etc/dnsmasq.conf.orig"])
 
     with open('/etc/dnsmasq.conf', "w") as dnsmasq:
         dnsmasq.write("interface={}\n".format(interface))
         dnsmasq.write("dhcp-range="
                       "192.168.4.2,192.168.4.20,255.255.255.0,24h\n")
 
-    # popen('systemctl reload dnsmasq')
+    # popen(["systemctl reload dnsmasq')
 
     # "echo 'nickw444  ALL=(ALL:ALL) ALL' >> /etc/sudoers"
 
@@ -101,16 +101,22 @@ Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/yawap
 
+[Install]
+WantedBy=multi-user.target
+
 """
 
     with open('/etc/systemd/system/yawap.service', 'w') as service_file:
         service_file.write(service_file_data)
 
 
+    popen(["systemctl", "enable", "yawap"])
+
+
 def scan_networks(interface="wlan0"):
     print("Scanning available networks")
     command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
-    result = popen(command)
+    result = os.popen(command)  # keep it easy for now
     result = list(result)
     ssid_list = []
 
@@ -122,7 +128,7 @@ def scan_networks(interface="wlan0"):
 
 def turn_on_ap():
     print("Starting AP")
-    popen("systemctl stop dhcpcd")
+    popen(["systemctl", "stop", "dhcpcd"])
 
     with open("/etc/dhcpcd.conf.source") as dhcpcd_fd:
         dhcpcd_src = dhcpcd_fd.read()
@@ -132,26 +138,26 @@ def turn_on_ap():
         lines = "interface wlan0\n    static ip_address=192.168.4.1/24\n    nohook wpa_supplicant\n"
         dhcpcd_fd.write(lines)
 
-    # popen("systemctl daemon-reload")
-    popen("systemctl start dhcpcd")
+    # popen(["systemctl daemon-reload")
+    popen(["systemctl", "start", "dhcpcd"])
 
-    popen("systemctl start dnsmasq")
-    popen("systemctl start hostapd")
+    popen(["systemctl", "start", "dnsmasq"])
+    popen(["systemctl", "start", "hostapd"])
 
 
 def turn_off_ap():
     print("[Stoping AP]")
-    popen("systemctl stop hostapd")
-    popen("systemctl stop dnsmasq")
+    popen(["systemctl", "stop", "hostapd"])
+    popen(["systemctl", "stop", "dnsmasq"])
 
-    popen("ip addr flush dev wlan0")
-    popen("ip link set dev wlan0 up")
+    popen(["ip", "addr", "flush", "dev", "wlan0"])
+    popen(["ip", "link", "set", "dev", "wlan0", "up"])
 
-    popen("systemctl stop dhcpcd")
-    popen("cp /etc/dhcpcd.conf.source /etc/dhcpcd.conf")
-    # popen("systemctl daemon-reload")
+    popen(["systemctl", "stop", "dhcpcd"])
+    popen(["cp", "/etc/dhcpcd.conf.source", "/etc/dhcpcd.conf"])
+    # popen(["systemctl daemon-reload"])
 
-    popen("systemctl start dhcpcd")
+    popen(["systemctl", "start", "dhcpcd"])
 
 
 def is_connected_to_internet():
