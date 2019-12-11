@@ -95,6 +95,7 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
 [Unit]
 Description=Yet Another Wifi Access Point Daemon
 After=multi-user.target
+After=network.target
 
 [Service]
 Type=oneshot
