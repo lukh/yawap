@@ -4,4 +4,4 @@
 
 __author__ = """Vivien Henry"""
 __email__ = 'vivien.henry@inductivebrain.fr'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
