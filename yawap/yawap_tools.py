@@ -3,6 +3,7 @@
 import yawap.wpasupplicantconf as wsc
 
 import os
+import shutil
 import time
 import subprocess
 import argparse
@@ -45,7 +46,7 @@ def install(ap_name, ap_passwd, interface="wlan0"):
 
     # dnsmasq
     if not os.path.isfile("/etc/dnsmasq.conf.orig"):
-        popen(["mv", "/etc/dnsmasq.conf", "/etc/dnsmasq.conf.orig"])
+        shutil.copy("/etc/dnsmasq.conf", "/etc/dnsmasq.conf.orig")
 
     with open('/etc/dnsmasq.conf', "w") as dnsmasq:
         dnsmasq.write("interface={}\n".format(interface))
