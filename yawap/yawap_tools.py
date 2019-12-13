@@ -23,8 +23,9 @@ def popen(cmd):
 def install(ap_name, ap_passwd, interface="wlan0"):
     popen(["systemctl", "unmask", "hostapd"])
 
-    popen(["systemctl", "enable", "dnsmasq"])
-    popen(["systemctl", "enable", "hostapd"])
+    # TODO: disable these services to be able to connect to internet at startup ?
+    popen(["systemctl", "disable", "dnsmasq"])
+    popen(["systemctl", "disable", "hostapd"])
     time.sleep(2)
 
     popen(["systemctl", "stop", "dnsmasq"])
@@ -95,8 +96,7 @@ rsn_pairwise=CCMP""".format(interface, ap_name, ap_passwd))
     service_file_data = """\
 [Unit]
 Description=Yet Another Wifi Access Point Daemon
-After=multi-user.target
-After=network.target
+After=network-online.target
 
 [Service]
 Type=oneshot
@@ -223,6 +223,7 @@ def main():
         turn_off_ap()
 
     else:
+        turn_off_ap()
         if not is_connected_to_internet():
             print("Not connected to internet, started the AP")
 
