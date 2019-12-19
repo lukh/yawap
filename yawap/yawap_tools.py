@@ -7,12 +7,14 @@ import shutil
 import time
 import subprocess
 from signal import signal, SIGPIPE, SIG_DFL
-signal(SIGPIPE, SIG_DFL)
+import Pyro4
 
+signal(SIGPIPE, SIG_DFL)
 
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
+@Pyro4.expose
 class Yawap(object):
     def popen(self, cmd):
         ret = subprocess.run(cmd, capture_output=True)

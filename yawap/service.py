@@ -11,7 +11,7 @@ import time
 import Pyro4
 from service import find_syslog, Service
 
-import yawap_tools
+from . import yawap_tools
 
 signal(SIGPIPE, SIG_DFL)
 
@@ -20,10 +20,6 @@ UDS_YAWAP = "/tmp/yawap.s"
 
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
-
-@Pyro4.expose
-class YawapExposed(yawap_tools.Yawap):
-    pass
 
 
 class YawapService(Service):
@@ -39,7 +35,7 @@ class YawapService(Service):
             os.unlink(UDS_YAWAP)
         daemon = Pyro4.Daemon(unixsocket=UDS_YAWAP)
 
-        uri = daemon.register(YawapExposed, objectId=PYRO_OBJ_ID)
+        uri = daemon.register(yawap_tools.Yawap, objectId=PYRO_OBJ_ID)
         self.logger.info(uri)
 
         daemon.requestLoop(loopCondition=lambda : not self.got_sigterm())
