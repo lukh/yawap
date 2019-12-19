@@ -79,6 +79,10 @@ def main():
         if args.service[0] == "start" and not service.is_running():
             print("starting...")
             service.start()
+            while not service.is_running():
+                time.sleep(0.2)
+
+            yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
 
             yawap_make.turn_off_ap()
             if not is_connected_to_internet():
