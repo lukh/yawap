@@ -26,28 +26,28 @@ class WpaSupplicantConf:
         network = None
         for line in lines:
             line = line.strip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 continue
 
             if line == "}":
                 if network is None:
                     raise ParseError("unxpected '}'")
 
-                ssid = network.pop('ssid', None)
+                ssid = network.pop("ssid", None)
                 if ssid is None:
                     raise ParseError('missing "ssid" for network')
                 self._networks[dequote(ssid)] = network
                 network = None
                 continue
 
-            parts = [x.strip() for x in line.split('=', 1)]
+            parts = [x.strip() for x in line.split("=", 1)]
             if len(parts) != 2:
                 raise ParseError("invalid line: %{!r}".format(line))
 
             left, right = parts
 
-            if right == '{':
-                if left != 'network':
+            if right == "{":
+                if left != "network":
                     raise ParseError('unsupported section: "{}"'.format(left))
                 if network is not None:
                     raise ParseError("can't nest networks")
@@ -72,7 +72,7 @@ class WpaSupplicantConf:
         self._networks.pop(ssid, None)
 
     def write(self, filename):
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             for name, value in self._fields.items():
                 f.write("{}={}\n".format(name, value))
 
