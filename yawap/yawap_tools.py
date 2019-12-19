@@ -98,17 +98,16 @@ class Yawap(object):
 
         # service
         service_file_data = """\
-    [Unit]
-    Description=Yet Another Wifi Access Point Daemon
-    After=network-online.target
+[Unit]
+Description=Yet Another Wifi Access Point Daemon
+After=network-online.target
 
-    [Service]
-    Type=oneshot
-    RemainAfterExit=yes
-    ExecStart=/usr/local/bin/yawap
+[Service]
+ExecStart=/usr/local/bin/yawap --service start
+ExecStop=/usr/local/bin/yawap --service stop
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 
     """
 
