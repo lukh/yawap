@@ -62,20 +62,20 @@ class Yawap(object):
         with open("/etc/hostapd/hostapd.conf", "w") as hostapd:
             hostapd.write(
                 """\
-    interface={}
-    driver=nl80211
-    ssid={}
-    hw_mode=g
-    channel=7
-    wmm_enabled=0
-    macaddr_acl=0
-    auth_algs=1
-    ignore_broadcast_ssid=0
-    wpa=2
-    wpa_passphrase={}
-    wpa_key_mgmt=WPA-PSK
-    wpa_pairwise=TKIP
-    rsn_pairwise=CCMP""".format(
+interface={}
+driver=nl80211
+ssid={}
+hw_mode=g
+channel=7
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase={}
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP""".format(
                     interface, ap_name, ap_passwd
                 )
             )
