@@ -111,7 +111,8 @@ def main():
         yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
 
         if args.install is not None:
-            yawap_make.install(
+            yawap_instance = yawap_tools.Yawap(logging.getLogger('Yawap Installer'))
+            yawap_instance.install(
                 args.install[1], args.install[2], interface=args.install[0]
             )
 
