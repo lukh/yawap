@@ -35,8 +35,8 @@ class YawapService(Service):
             os.unlink(UDS_YAWAP)
         daemon = Pyro4.Daemon(unixsocket=UDS_YAWAP)
 
-        uri = daemon.register(yawap_tools.Yawap, objectId=PYRO_OBJ_ID)
-        self.logger.info(uri)
+        yawap_instance = yawap_tools.Yawap(self.logger)
+        daemon.register(yawap_instance, objectId=PYRO_OBJ_ID)
 
         daemon.requestLoop(loopCondition=lambda : not self.got_sigterm())
 

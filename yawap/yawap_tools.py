@@ -16,10 +16,13 @@ WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
 @Pyro4.expose
 class Yawap(object):
+    def __init__(self, logger):
+        self.logger = logger
+        
     def popen(self, cmd):
+        self.logger.info(f'RUN > "{" ".join(cmd)}"')
         ret = subprocess.run(cmd, capture_output=True)
         return (ret.returncode, ret.stdout)
-
 
     def install(self, ap_name, ap_passwd, interface="wlan0"):
         self.popen(["systemctl", "unmask", "hostapd"])
@@ -117,7 +120,7 @@ class Yawap(object):
 
 
     def scan_networks(self, interface="wlan0"):
-        print("Scanning available networks")
+        self.logger.info("Scanning available networks")
         command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
         result = os.popen(command)  # keep it easy for now
         result = list(result)
@@ -130,7 +133,7 @@ class Yawap(object):
 
 
     def turn_on_ap(self):
-        print("Starting AP")
+        self.logger.info("Starting AP")
         self.popen(["systemctl", "stop", "dhcpcd"])
 
         with open("/etc/dhcpcd.conf.source") as dhcpcd_fd:
@@ -149,7 +152,7 @@ class Yawap(object):
 
 
     def turn_off_ap(self):
-        print("[Stoping AP]")
+        self.logger.info("[Stoping AP]")
         self.popen(["systemctl", "stop", "hostapd"])
         self.popen(["systemctl", "stop", "dnsmasq"])
 
@@ -164,7 +167,7 @@ class Yawap(object):
 
 
     def is_connected_to_internet(self):
-        print("Checking Internet Connection")
+        self.logger.info("Checking Internet Connection")
         # ping google gateway
         cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
