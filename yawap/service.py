@@ -78,6 +78,21 @@ def main():
         if args.service[0] == "start" and not service.is_running():
             print("starting...")
             service.start()
+
+            yawap_make.turn_off_ap()
+            if not is_connected_to_internet():
+                print("Not connected to internet, started the AP")
+
+                networks = yawap_make.scan_networks()
+
+                with open(WIFI_NETWORK_LIST_FILE, 'w') as fp:
+                    fp.write(";".join(networks))
+
+                yawap_make.turn_on_ap()
+
+            else:
+                print("Connected :) ! Leaving")
+                
         elif args.service[0] == "stop" and service.is_running():
             print("stoping...")
             service.stop()
@@ -107,18 +122,3 @@ def main():
         elif args.add is not None:
             yawap_make.add_network(args.add[0], args.add[1])
             yawap_make.turn_off_ap()
-
-        else:
-            yawap_make.turn_off_ap()
-            if not is_connected_to_internet():
-                print("Not connected to internet, started the AP")
-
-                networks = yawap_make.scan_networks()
-
-                with open(WIFI_NETWORK_LIST_FILE, 'w') as fp:
-                    fp.write(";".join(networks))
-
-                yawap_make.turn_on_ap()
-
-            else:
-                print("Connected :) ! Leaving")
