@@ -7,7 +7,6 @@ from setuptools import setup, find_packages
 from setuptools import Distribution
 from setuptools.command.install import install
 from yawap import __version__
-from yawap import yawap_tools
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -23,23 +22,6 @@ requirements = [
 setup_requirements = [ ]
 
 test_requirements = [ ]
-
-
-class OnlyGetScriptPath(install):
-    def run(self):
-        self.distribution.install_scripts = self.install_scripts
-
-
-def get_setuptools_script_dir():
-    " Get the directory setuptools installs scripts to for current python "
-    dist = Distribution({'cmdclass': {'install': OnlyGetScriptPath}})
-    dist.dry_run = True  # not sure if necessary
-    dist.parse_config_files()
-    command = dist.get_command_obj('install')
-    command.ensure_finalized()
-    command.run()
-    return dist.install_scripts
-
 
 
 setup(
@@ -74,6 +56,3 @@ setup(
     version=__version__,
     zip_safe=False
 )
-
-# yawap_tools.install()
-# print (get_setuptools_script_dir())
