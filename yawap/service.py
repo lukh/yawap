@@ -27,7 +27,8 @@ class YawapService(Service):
     def __init__(self, *args, **kwargs):
         super(YawapService, self).__init__(*args, **kwargs)
         self.logger.addHandler(
-            SysLogHandler(address=find_syslog(), facility=SysLogHandler.LOG_DAEMON)
+            SysLogHandler(address=find_syslog(),
+                          facility=SysLogHandler.LOG_DAEMON)
         )
         self.logger.setLevel(logging.INFO)
 
@@ -48,18 +49,22 @@ class YawapService(Service):
 def parse():
     parser = argparse.ArgumentParser(
         description="Check internet connectivity and manage access point. "
-        "If started without arguments, and a internet connection is not available, "
+        "If started without arguments, "
+        "and a internet connection is not available, "
         "then it scans wifi networks and starts in AP mode"
         "It is possible to manually turn on or off the AP. "
-        "And it is possible to add Wifi network or get the list of available network found."
+        "And it is possible to add Wifi network or get the list "
+        "of available network found."
     )
     parser.add_argument("--service", nargs=1)
     parser.add_argument(
         "--install",
         nargs=3,
-        help="Install hostapd, dnsmasq. " "Usage: --install INTERFACE SSID PASSWD",
+        help="Install hostapd, dnsmasq. "
+             "Usage: --install INTERFACE SSID PASSWD",
     )
-    parser.add_argument("--on", action="store_true", help="Start the access point")
+    parser.add_argument("--on", action="store_true",
+                        help="Start the access point")
     parser.add_argument(
         "--off",
         action="store_true",
@@ -69,7 +74,8 @@ def parse():
         "--list", action="store_true", help="Return the scanned Wifi Networks"
     )
     parser.add_argument(
-        "--add", nargs=2, help="Connect to the network given." "Usage: --add SSID Key"
+        "--add", nargs=2,
+        help="Connect to the network given." "Usage: --add SSID Key"
     )
 
     return parser.parse_args()
@@ -85,7 +91,8 @@ def main():
             print("starting...")
             service.start()
 
-            # Waiting for the service to start and create the communication channel
+            # Waiting for the service to start
+            # and create the communication channel
             t = time.time()
             while (time.time() - t) < 5:
                 if service.is_running():
@@ -95,7 +102,7 @@ def main():
                 logging.error("Can't start the service")
                 service.kill()
                 sys.exit(-1)
-            
+
             t = time.time()
             while (time.time() - t) < 5:
                 if os.path.exists(UDS_YAWAP):
@@ -106,8 +113,9 @@ def main():
                 service.kill()
                 sys.exit(-1)
 
-
-            yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
+            yawap_make = Pyro4.Proxy(
+                "PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP
+            )
 
             yawap_make.turn_off_ap()
             if not yawap_make.is_connected_to_internet():
@@ -136,7 +144,9 @@ def main():
         yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
 
         if args.install is not None:
-            yawap_instance = yawap_tools.Yawap(logging.getLogger('Yawap Installer'))
+            yawap_instance = yawap_tools.Yawap(
+                logging.getLogger("Yawap Installer")
+            )
             yawap_instance.install(
                 args.install[1], args.install[2], interface=args.install[0]
             )

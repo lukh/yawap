@@ -28,7 +28,6 @@ class Yawap(object):
     def install(self, ap_name, ap_passwd, interface="wlan0"):
         self.popen(["systemctl", "unmask", "hostapd"])
 
-        # TODO: disable these services to be able to connect to internet at startup ?
         self.popen(["systemctl", "disable", "dnsmasq"])
         self.popen(["systemctl", "disable", "hostapd"])
         time.sleep(2)
@@ -52,7 +51,9 @@ class Yawap(object):
 
         with open("/etc/dnsmasq.conf", "w") as dnsmasq:
             dnsmasq.write("interface={}\n".format(interface))
-            dnsmasq.write("dhcp-range=" "192.168.4.2,192.168.4.20,255.255.255.0,24h\n")
+            dnsmasq.write(
+                "dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h\n"
+            )
 
         # self.popen(["systemctl reload dnsmasq')
 
@@ -83,7 +84,10 @@ rsn_pairwise=CCMP""".format(
         with open("/etc/default/hostapd", "r") as hostapd_default:
             had = hostapd_default.read()
 
-        had = had.replace('#DAEMON_CONF=""', 'DAEMON_CONF="/etc/hostapd/hostapd.conf"')
+        had = had.replace(
+            '#DAEMON_CONF=""',
+            'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
+        )
         with open("/etc/default/hostapd", "w") as hostapd_default:
             hostapd_default.write(had)
 
@@ -114,13 +118,16 @@ WantedBy=multi-user.target
 
     def scan_networks(self, interface="wlan0"):
         self.logger.info("Scanning available networks")
-        command = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
-        result = os.popen(command)  # keep it easy for now
+        cmd = """iwlist {} scan | grep -ioE 'SSID:"(.*)"'""".format(interface)
+        result = os.popen(cmd)  # keep it easy for now
         result = list(result)
         ssid_list = []
 
         if "Device or resource busy" not in result:
-            ssid_list = [item.lstrip("SSID:").strip("\n").strip('"') for item in result]
+            ssid_list = [
+                item.lstrip("SSID:").strip("\n").strip('"')
+                for item in result
+            ]
 
         return [i for i in set(ssid_list) if i != ""]
 
@@ -133,7 +140,9 @@ WantedBy=multi-user.target
 
         with open("/etc/dhcpcd.conf", "w") as dhcpcd_fd:
             dhcpcd_fd.write(dhcpcd_src)
-            lines = "interface wlan0\n    static ip_address=192.168.4.1/24\n    nohook wpa_supplicant\n"
+            lines = "interface wlan0\n" \
+                    "    static ip_address=192.168.4.1/24\n" \
+                    "    nohook wpa_supplicant\n"
             dhcpcd_fd.write(lines)
 
         # self.popen(["systemctl daemon-reload")
@@ -160,7 +169,11 @@ WantedBy=multi-user.target
         self.logger.info("Checking Internet Connection")
         # ping google gateway
         cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None, shell=True)
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=None, shell=True
+        )
         output, _ = process.communicate()
 
         return output.find(b"ok") != -1
