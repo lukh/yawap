@@ -44,7 +44,7 @@ class YawapService(Service):
         self.logger.info("Stop Daemon")
 
 
-def main():
+def parse():
     parser = argparse.ArgumentParser(
         description="Check internet connectivity and manage access point. "
         "If started without arguments, and a internet connection is not available, "
@@ -71,7 +71,11 @@ def main():
         "--add", nargs=2, help="Connect to the network given." "Usage: --add SSID Key"
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    args = parse()
 
     service = YawapService("yawap", pid_dir="/tmp")
 
