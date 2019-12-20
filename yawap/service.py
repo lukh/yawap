@@ -88,7 +88,7 @@ def main():
 
     if args.service is not None:
         if args.service[0] == "start" and not service.is_running():
-            print("starting...")
+            logging.info("starting...")
             service.start()
 
             # Waiting for the service to start
@@ -119,7 +119,7 @@ def main():
 
             yawap_make.turn_off_ap()
             if not yawap_make.is_connected_to_internet():
-                print("Not connected to internet, started the AP")
+                logging.info("Not connected to internet, started the AP")
 
                 networks = yawap_make.scan_networks()
 
@@ -129,16 +129,16 @@ def main():
                 yawap_make.turn_on_ap()
 
             else:
-                print("Connected :) ! Leaving")
+                logging.info("Connected :) ! Leaving")
 
         elif args.service[0] == "stop" and service.is_running():
-            print("stoping...")
+            logging.info("stoping...")
             service.stop()
         elif args.service[0] == "status":
             if service.is_running():
-                print("Service is running.")
+                logging.info("Service is running.")
             else:
-                print("Service is not running.")
+                logging.info("Service is not running.")
 
     else:
         yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
@@ -152,7 +152,7 @@ def main():
             )
 
         elif args.on:
-            print(yawap_make.turn_on_ap())
+            yawap_make.turn_on_ap()
 
         elif args.off:
             yawap_make.turn_off_ap()
@@ -163,5 +163,6 @@ def main():
                 print(f.read())
 
         elif args.add is not None:
+            logging.info(f"Adding network: {args.add[0]}")
             yawap_make.add_network(args.add[0], args.add[1])
             yawap_make.turn_off_ap()
