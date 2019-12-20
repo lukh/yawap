@@ -82,6 +82,7 @@ def main():
             while not service.is_running():
                 time.sleep(0.2)
 
+            # TODO
             time.sleep(3)
             yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
 

@@ -98,6 +98,7 @@ Description=Yet Another Wifi Access Point Daemon
 After=network-online.target
 
 [Service]
+Type=forking
 ExecStart=/usr/local/bin/yawap --service start
 ExecStop=/usr/local/bin/yawap --service stop
 
