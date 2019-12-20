@@ -79,11 +79,18 @@ def main():
         if args.service[0] == "start" and not service.is_running():
             print("starting...")
             service.start()
-            while not service.is_running():
+
+            # Waiting for the service to start and create the communication channel
+            t = time.time()
+            while not service.is_running() and (time.time() - t) < 5:
+                time.sleep(0.2)
+            t = time.time()
+            while not os.path.exists(UDS_YAWAP) and (time.time() - t) < 5:
                 time.sleep(0.2)
 
-            # TODO
-            time.sleep(3)
+            if not(service.is_running() and os.path.exists(UDS_YAWAP)):
+                return
+
             yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
 
             yawap_make.turn_off_ap()
