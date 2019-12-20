@@ -2,7 +2,12 @@
 History
 =======
 
-0.0.4 (2019-12-16)
+0.0.6 (2019-12-20)
+------------------
+
+* Run as a daemon, allow use as non root user
+
+0.0.5 (2019-12-16)
 ------------------
 
 * bugfix: reset connection at startup
