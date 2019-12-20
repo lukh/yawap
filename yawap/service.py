@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import argparse
 from signal import signal, SIGPIPE, SIG_DFL
 
@@ -86,14 +87,25 @@ def main():
 
             # Waiting for the service to start and create the communication channel
             t = time.time()
-            while not service.is_running() and (time.time() - t) < 5:
+            while (time.time() - t) < 5:
+                if service.is_running():
+                    break
                 time.sleep(0.2)
+            else:
+                logging.error("Can't start the service")
+                service.kill()
+                sys.exit(-1)
+            
             t = time.time()
-            while not os.path.exists(UDS_YAWAP) and (time.time() - t) < 5:
+            while (time.time() - t) < 5:
+                if os.path.exists(UDS_YAWAP):
+                    break
                 time.sleep(0.2)
+            else:
+                logging.error("Can't communicate with the service")
+                service.kill()
+                sys.exit(-1)
 
-            if not(service.is_running() and os.path.exists(UDS_YAWAP)):
-                return
 
             yawap_make = Pyro4.Proxy("PYRO:" + PYRO_OBJ_ID + "@./u:" + UDS_YAWAP)
 
