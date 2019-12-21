@@ -94,7 +94,7 @@ def main():
             # Waiting for the service to start
             # and create the communication channel
             t = time.time()
-            while (time.time() - t) < 5:
+            while (time.time() - t) < 20:
                 if service.is_running():
                     break
                 time.sleep(0.2)
