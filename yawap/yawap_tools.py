@@ -167,16 +167,23 @@ WantedBy=multi-user.target
 
     def is_connected_to_internet(self):
         self.logger.info("Checking Internet Connection")
-        # ping google gateway
-        cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=None, shell=True
-        )
-        output, _ = process.communicate()
+        t = time.time()
+        connected = False
+        while time.time() - t < 10:
+            # ping google gateway
+            cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=None, shell=True
+            )
+            output, _ = process.communicate()
 
-        return output.find(b"ok") != -1
+            connected = output.find(b"ok") != -1
+            if connected:
+                break
+
+        return connected
 
     def add_network(self, ssid, passwd):
         conf = wsc.WpaSupplicantConf("/etc/wpa_supplicant/wpa_supplicant.conf")
