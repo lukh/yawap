@@ -13,6 +13,7 @@ import Pyro4
 from service import find_syslog, Service
 
 from . import yawap_tools
+from . import wpasupplicantconf
 
 signal(SIGPIPE, SIG_DFL)
 
@@ -21,6 +22,8 @@ UDS_YAWAP = "/tmp/yawap.s"
 
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
+
+WPA_SUPPLICANT_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf"
 
 
 class YawapService(Service):
@@ -72,6 +75,9 @@ def parse():
     )
     parser.add_argument(
         "--list", action="store_true", help="Return the scanned Wifi Networks"
+    )
+    parser.add_argument(
+        "--list-saved", action="store_true", help="Return the Saved Wifi Networks"
     )
     parser.add_argument(
         "--add", nargs=2,
@@ -161,6 +167,16 @@ def main():
             # if ap mode started
             with open(WIFI_NETWORK_LIST_FILE) as f:
                 print(f.read())
+
+        elif args.list_saved:
+            try:
+                conf = wpasupplicantconf.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
+                networks = conf.networks()
+            except (wpasupplicantconf.ParseError, IOError):
+                networks = []
+
+            print(";".join(networks))
+
 
         elif args.add is not None:
             logging.info(f"Adding network: {args.add[0]}")
