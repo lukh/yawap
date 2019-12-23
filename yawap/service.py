@@ -83,6 +83,10 @@ def parse():
         "--add", nargs=2,
         help="Connect to the network given." "Usage: --add SSID Key"
     )
+    parser.add_argument(
+        "--delete", nargs=1,
+        help="Delete the network given." "Usage: --del SSID"
+    )
 
     return parser.parse_args()
 
@@ -182,3 +186,7 @@ def main():
             logging.info(f"Adding network: {args.add[0]}")
             yawap_make.add_network(args.add[0], args.add[1])
             yawap_make.turn_off_ap()
+
+        elif args.delete is not None:
+            logging.info(f"Deleting network: {args.del[0]}")
+            yawap_make.del_network(args.del[0])

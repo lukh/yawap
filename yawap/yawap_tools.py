@@ -189,3 +189,8 @@ WantedBy=multi-user.target
         conf = wsc.WpaSupplicantConf("/etc/wpa_supplicant/wpa_supplicant.conf")
         conf.add_network(ssid, psk='"{}"'.format(passwd), key_mgmt="WPA-PSK")
         conf.write("/etc/wpa_supplicant/wpa_supplicant.conf")
+
+    def del_network(self, ssid):
+        conf = wsc.WpaSupplicantConf("/etc/wpa_supplicant/wpa_supplicant.conf")
+        conf.remove_network(ssid)
+        conf.write("/etc/wpa_supplicant/wpa_supplicant.conf")
