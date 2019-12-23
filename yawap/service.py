@@ -23,8 +23,6 @@ UDS_YAWAP = "/tmp/yawap.s"
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
-WPA_SUPPLICANT_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf"
-
 
 class YawapService(Service):
     def __init__(self, *args, **kwargs):
@@ -173,12 +171,7 @@ def main():
                 print(f.read())
 
         elif args.list_saved:
-            try:
-                conf = wpasupplicantconf.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
-                networks = conf.networks()
-            except (wpasupplicantconf.ParseError, IOError):
-                networks = []
-
+            networks = yawap_make.list_saved()
             print(";".join(networks))
 
 
@@ -188,5 +181,5 @@ def main():
             yawap_make.turn_off_ap()
 
         elif args.delete is not None:
-            logging.info(f"Deleting network: {args.del[0]}")
-            yawap_make.del_network(args.del[0])
+            logging.info(f"Deleting network: {args.delete[0]}")
+            yawap_make.del_network(args.delete[0])

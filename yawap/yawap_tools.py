@@ -14,6 +14,8 @@ signal(SIGPIPE, SIG_DFL)
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
 WIFI_NETWORK_LIST_FILE = WIFI_NETWORK_LIST_FOLDER + "scanned_networks"
 
+WPA_SUPPLICANT_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf"
+
 
 @Pyro4.expose
 class Yawap(object):
@@ -186,11 +188,22 @@ WantedBy=multi-user.target
         return connected
 
     def add_network(self, ssid, passwd):
-        conf = wsc.WpaSupplicantConf("/etc/wpa_supplicant/wpa_supplicant.conf")
+        conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
         conf.add_network(ssid, psk='"{}"'.format(passwd), key_mgmt="WPA-PSK")
-        conf.write("/etc/wpa_supplicant/wpa_supplicant.conf")
+        conf.write(WPA_SUPPLICANT_FILE)
 
     def del_network(self, ssid):
-        conf = wsc.WpaSupplicantConf("/etc/wpa_supplicant/wpa_supplicant.conf")
+        conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
         conf.remove_network(ssid)
-        conf.write("/etc/wpa_supplicant/wpa_supplicant.conf")
+        conf.write(WPA_SUPPLICANT_FILE)
+
+
+    def list_saved(self):
+        try:
+            conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
+            networks = conf.networks().keys()
+        except (wsc.ParseError, IOError) as e:
+            self.logger.error(str(e))
+            networks = []
+
+        return networks
