@@ -29,7 +29,9 @@ class Yawap(object):
         ret = subprocess.run(cmd, capture_output=True)
         return (ret.returncode, ret.stdout)
 
-    def install(self, ap_name, ap_passwd, interface="wlan0", iso_country_code="EN"):
+    def install(
+        self, ap_name, ap_passwd, interface="wlan0", iso_country_code="EN"
+    ):
         self.popen(["systemctl", "unmask", "hostapd"])
 
         self.popen(["systemctl", "disable", "dnsmasq"])
@@ -49,14 +51,12 @@ class Yawap(object):
             with open("/etc/dhcpcd.conf.source", "w") as fp_dhcpcd_source:
                 fp_dhcpcd_source.write(dhcpcd)
 
-
         # wpa_supplicant
         if iso_country_code in icc.CC:
             wpa = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
-            wpa.fields()['country'] = iso_country_code
+            wpa.fields()["country"] = iso_country_code
 
             wpa.write(WPA_SUPPLICANT_FILE)
-
 
         # dnsmasq
         if not os.path.isfile("/etc/dnsmasq.conf.orig"):
@@ -98,8 +98,7 @@ rsn_pairwise=CCMP""".format(
             had = hostapd_default.read()
 
         had = had.replace(
-            '#DAEMON_CONF=""',
-            'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
+            '#DAEMON_CONF=""', 'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
         )
         with open("/etc/default/hostapd", "w") as hostapd_default:
             hostapd_default.write(had)
@@ -138,8 +137,7 @@ WantedBy=multi-user.target
 
         if "Device or resource busy" not in result:
             ssid_list = [
-                item.lstrip("SSID:").strip("\n").strip('"')
-                for item in result
+                item.lstrip("SSID:").strip("\n").strip('"') for item in result
             ]
 
         return [i for i in set(ssid_list) if i != ""]
@@ -153,9 +151,11 @@ WantedBy=multi-user.target
 
         with open("/etc/dhcpcd.conf", "w") as dhcpcd_fd:
             dhcpcd_fd.write(dhcpcd_src)
-            lines = "interface wlan0\n" \
-                    "    static ip_address=192.168.4.1/24\n" \
-                    "    nohook wpa_supplicant\n"
+            lines = (
+                "interface wlan0\n"
+                "    static ip_address=192.168.4.1/24\n"
+                "    nohook wpa_supplicant\n"
+            )
             dhcpcd_fd.write(lines)
 
         # self.popen(["systemctl daemon-reload")
@@ -179,16 +179,15 @@ WantedBy=multi-user.target
         self.popen(["systemctl", "start", "dhcpcd"])
 
     def is_connected_to_internet(self):
+        cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
+
         self.logger.info("Checking Internet Connection")
         t = time.time()
         connected = False
         while time.time() - t < 10:
             # ping google gateway
-            cmd = "ping -q -w 1 -c 1 8.8.8.8 > /dev/null && echo ok || echo error"
             process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=None, shell=True
+                cmd, stdout=subprocess.PIPE, stderr=None, shell=True
             )
             output, _ = process.communicate()
 
@@ -199,20 +198,19 @@ WantedBy=multi-user.target
         return connected
 
     def add_network(self, ssid, passwd, **extra_conf):
-        if 'key_mgmt' not in extra_conf:
-            extra_conf['key_mgmt'] = "WPA-PSK"
+        if "key_mgmt" not in extra_conf:
+            extra_conf["key_mgmt"] = "WPA-PSK"
 
         conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
 
         conf.add_network(ssid, psk='"{}"'.format(passwd), **extra_conf)
-        
+
         conf.write(WPA_SUPPLICANT_FILE)
 
     def del_network(self, ssid):
         conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
         conf.remove_network(ssid)
         conf.write(WPA_SUPPLICANT_FILE)
-
 
     def list_saved(self):
         try:
