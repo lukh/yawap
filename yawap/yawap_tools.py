@@ -9,6 +9,8 @@ import subprocess
 from signal import signal, SIGPIPE, SIG_DFL
 import Pyro4
 
+import iso_country_codes as icc
+
 signal(SIGPIPE, SIG_DFL)
 
 WIFI_NETWORK_LIST_FOLDER = "/var/lib/yawap/"
@@ -27,7 +29,7 @@ class Yawap(object):
         ret = subprocess.run(cmd, capture_output=True)
         return (ret.returncode, ret.stdout)
 
-    def install(self, ap_name, ap_passwd, interface="wlan0"):
+    def install(self, ap_name, ap_passwd, interface="wlan0", iso_country_code="EN"):
         self.popen(["systemctl", "unmask", "hostapd"])
 
         self.popen(["systemctl", "disable", "dnsmasq"])
@@ -46,6 +48,15 @@ class Yawap(object):
             dhcpcd += "\n" "noarp\n" "timeout 2\n" "retry 5\n"
             with open("/etc/dhcpcd.conf.source", "w") as fp_dhcpcd_source:
                 fp_dhcpcd_source.write(dhcpcd)
+
+
+        # wpa_supplicant
+        if iso_country_code in icc.CC:
+            wpa = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
+            wpa.fields()['country'] = iso_country_code
+
+            wpa.write(WPA_SUPPLICANT_FILE)
+
 
         # dnsmasq
         if not os.path.isfile("/etc/dnsmasq.conf.orig"):
