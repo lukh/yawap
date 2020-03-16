@@ -221,3 +221,18 @@ WantedBy=multi-user.target
             networks = []
 
         return networks
+
+    def get_wpa_supplicant_config(self):
+        try:
+            conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
+            fields = conf.fields()
+        except (wsc.ParseError, IOError) as e:
+            self.logger.error(str(e))
+            fields = {}
+
+        return dict(fields)
+
+    def set_wpa_supplicant_config(self, fields):
+        conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
+        conf.fields().update(fields)
+        conf.write(WPA_SUPPLICANT_FILE)

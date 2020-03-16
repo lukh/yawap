@@ -84,7 +84,7 @@ def parse():
         "--add",
         nargs=2,
         help="Connect to the network given." "Usage: --add SSID Key",
-    ),
+    )
     parser.add_argument(
         "--network-conf",
         nargs=2,
@@ -92,13 +92,23 @@ def parse():
         help="Extra network configuration for wpa_supplicant."
         "Usage: --network-conf KEY VALUE"
         "KEY and VALUE are valid wpa_supplicant params",
-    ),
+    )
     parser.add_argument(
         "--delete",
         nargs=1,
         help="Delete the network given." "Usage: --del SSID",
     )
-
+    parser.add_argument(
+        "--get-wpa-supplicant-conf",
+        action="store_true",
+        help="Returns the current global config of wpa_supplicant.conf"
+    )
+    parser.add_argument(
+        "--set-wpa-supplicant-conf",
+        nargs=2,
+        action="append",
+        help="Update wpa supplicant global configuration. Usage :--set-wpa-supplicant-conf KEY VALUE",
+    )
     return parser.parse_args()
 
 
@@ -203,3 +213,11 @@ def main():
         elif args.delete is not None:
             logging.info(f"Deleting network: {args.delete[0]}")
             yawap_make.del_network(args.delete[0])
+
+        elif args.get_wpa_supplicant_conf:
+            fields = yawap_make.get_wpa_supplicant_config()
+            print(";".join([str(k)+"="+str(fields[k]) for k in fields]))
+
+        elif args.set_wpa_supplicant_conf is not None:
+            conf = {el[0]: el[1] for el in args.set_wpa_supplicant_conf}
+            yawap_make.set_wpa_supplicant_config(conf)
