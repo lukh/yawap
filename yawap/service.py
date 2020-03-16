@@ -80,7 +80,13 @@ def parse():
     parser.add_argument(
         "--add", nargs=2,
         help="Connect to the network given." "Usage: --add SSID Key"
-    )
+    ),
+    parser.add_argument(
+        "--network-conf", nargs=2, action='append',
+        help="Extra network configuration for wpa_supplicant."
+        "Usage: --network-conf KEY VALUE"
+        "KEY and VALUE are valid wpa_supplicant params"
+    ),
     parser.add_argument(
         "--delete", nargs=1,
         help="Delete the network given." "Usage: --del SSID"
@@ -177,7 +183,8 @@ def main():
 
         elif args.add is not None:
             logging.info(f"Adding network: {args.add[0]}")
-            yawap_make.add_network(args.add[0], args.add[1])
+            extra_conf = {el[0]:el[1] for el in  args.network_conf}
+            yawap_make.add_network(args.add[0], args.add[1], **extra_conf)
             yawap_make.turn_off_ap()
 
         elif args.delete is not None:

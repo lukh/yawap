@@ -198,9 +198,14 @@ WantedBy=multi-user.target
 
         return connected
 
-    def add_network(self, ssid, passwd):
+    def add_network(self, ssid, passwd, **extra_conf):
+        if 'key_mgmt' not in extra_conf:
+            extra_conf['key_mgmt'] = "WPA-PSK"
+
         conf = wsc.WpaSupplicantConf(WPA_SUPPLICANT_FILE)
-        conf.add_network(ssid, psk='"{}"'.format(passwd), key_mgmt="WPA-PSK")
+
+        conf.add_network(ssid, psk='"{}"'.format(passwd), **extra_conf)
+        
         conf.write(WPA_SUPPLICANT_FILE)
 
     def del_network(self, ssid):
