@@ -60,7 +60,7 @@ def parse():
     parser.add_argument("--service", nargs=1)
     parser.add_argument(
         "--install",
-        nargs=3,
+        nargs=4,
         help="Install hostapd, dnsmasq. "
              "Usage: --install INTERFACE SSID PASSWD COUNTRYCODE",
     )
@@ -162,7 +162,7 @@ def main():
                 logging.getLogger("Yawap Installer")
             )
             yawap_instance.install(
-                args.install[1], args.install[2], interface=args.install[0], args.install[3]
+                args.install[1], args.install[2], interface=args.install[0], iso_country_code=args.install[3]
             )
 
         elif args.on:
@@ -183,7 +183,7 @@ def main():
 
         elif args.add is not None:
             logging.info(f"Adding network: {args.add[0]}")
-            extra_conf = {el[0]:el[1] for el in  args.network_conf}
+            extra_conf = {el[0]:el[1] for el in  args.network_conf} if args.network_conf is not None else {}
             yawap_make.add_network(args.add[0], args.add[1], **extra_conf)
             yawap_make.turn_off_ap()
 

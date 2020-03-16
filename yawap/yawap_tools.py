@@ -9,7 +9,7 @@ import subprocess
 from signal import signal, SIGPIPE, SIG_DFL
 import Pyro4
 
-import iso_country_codes as icc
+from yawap import iso_country_codes as icc
 
 signal(SIGPIPE, SIG_DFL)
 
