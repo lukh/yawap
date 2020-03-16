@@ -2,6 +2,12 @@
 History
 =======
 
+0.0.8 (2020-03-16)
+------------------
+
+* set the country code in wpa_supplicant during install
+* Can pass any wpa_supplicant param when adding a new network via --network-conf
+
 0.0.7 (2019-12-21)
 ------------------
 
