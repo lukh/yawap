@@ -2,6 +2,11 @@
 History
 =======
 
+0.0.9 (2020-03-16)
+------------------
+
+* allows to update / get global config of wpa_supplicant
+
 0.0.8 (2020-03-16)
 ------------------
 
